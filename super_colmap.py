@@ -1,10 +1,10 @@
-from .SuperPointDetectors import get_super_points_from_scenes_return
-from .matchers import mutual_nn_matcher
+from SuperPointDetectors import get_super_points_from_scenes_return
+from matchers import mutual_nn_matcher
 import cv2
 import os, time
 import numpy as np
 import argparse
-from .database import COLMAPDatabase
+from database import COLMAPDatabase
 
 camModelDict = {'SIMPLE_PINHOLE': 0,
                 'PINHOLE': 1,

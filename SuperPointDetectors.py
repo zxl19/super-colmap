@@ -1,8 +1,8 @@
-from .superpoint import SuperPoint
+from superpoint import SuperPoint
 import cv2
 import numpy as np
 import torch
-from .utils import *
+from utils import *
 import json
 import argparse
 from tqdm import tqdm
