@@ -26,7 +26,12 @@ def get_init_cameraparams(width, height, modelId):
     if modelId == 0:
         return np.array([f, cx, cy])
     elif modelId == 1:
-        return np.array([f, f, cx, cy])
+        # *Hard Coded Intrinsics
+        fx = 1052.227294921875
+        fy = 1052.227294921875
+        cx = 985.263916015625
+        cy = 551.7407836914062
+        return np.array([fx, fy, cx, cy])
     elif modelId == 2 or modelId == 6:
         return np.array([f, cx, cy, 0.0])
     elif modelId == 3 or modelId == 7:
@@ -91,8 +96,8 @@ def import_feature_from_sps(db, sps, images_name):
 
 
 def match_features(db, sps, images_name, match_list_path):
+    # *sequential match
     print("match features by sequential match............................")
-    # sequential match
     step_range = [1, 2, 3, 5, 8, 13, 21, 44, 65, 109, 174, 210]
     num_images = len(images_name)
     match_list = open(match_list_path, 'w')
@@ -103,7 +108,32 @@ def match_features(db, sps, images_name, match_list_path):
             D2 = sps[images_name[i + step]]['descriptors'] * 1.0
             matches = mutual_nn_matcher(D1, D2).astype(np.uint32)
             db.add_matches(i, i + step, matches)
+        # *manual loop closure
+        for i in range(num_images - step, num_images):
+            match_list.write("%s %s\n" % (images_name[i], images_name[i + step - num_images]))
+            D1 = sps[images_name[i]]['descriptors'] * 1.0
+            D2 = sps[images_name[i + step - num_images]]['descriptors'] * 1.0
+            matches = mutual_nn_matcher(D1, D2).astype(np.uint32)
+            db.add_matches(i, i + step - num_images, matches)
     match_list.close()
+    # *exhaustive match (reconstruction failed)
+    # print("match features by exhaustive match............................")
+    # num_images = len(images_name)
+    # match_list = open(match_list_path, 'w')
+    # N = num_images * (num_images - 1) / 2
+    # counter = 0
+    # for i in range(0, num_images - 1):
+    #     for j in range(i + 1, num_images):
+    #         match_list.write("%s %s\n" % (images_name[i], images_name[j]))
+    #         D1 = sps[images_name[i]]['descriptors'] * 1.0
+    #         D2 = sps[images_name[j]]['descriptors'] * 1.0
+    #         matches = mutual_nn_matcher(D1, D2).astype(np.uint32)
+    #         db.add_matches(i, j, matches)
+    #         counter = counter + 1
+    #         status(40, counter / N)
+    # status(40, 1)
+    # print("\nexhaustive match completed!")
+    # match_list.close()
 
 def operate(cmd):
     print(cmd)
@@ -122,7 +152,8 @@ def mapper(projpath, images_path):
     colmap_sparse_path = os.path.join(projpath, "sparse")
     makedir(colmap_sparse_path)
 
-    mapper = "colmap mapper --database_path %s --image_path %s --output_path %s" % (
+    # !DO NOT REFINE INTRINSICS DURING BUNDLE ADJUSTMENT
+    mapper = "colmap mapper --database_path %s --image_path %s --output_path %s --Mapper.ba_refine_focal_length 0 --Mapper.ba_refine_principal_point 0 --Mapper.ba_refine_extra_params 0" % (
         database_path, images_path, colmap_sparse_path
     )
     operate(mapper)
