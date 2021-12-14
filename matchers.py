@@ -35,11 +35,11 @@ def ratio_matcher(descriptors1, descriptors2, ratio=0.8, device="cuda"):
     ratios21 = nns_dist[:, 0] / (nns_dist[:, 1] + 1e-8)
     # Save first NN.
     nn21 = nns[:, 0]
-    
+
     # Symmetric ratio test.
     ids1 = torch.arange(0, sim.shape[0], device=device)
     mask = torch.min(ratios12 <= ratio, ratios21[nn12] <= ratio)
-    
+
     # Final matches.
     matches = torch.stack([ids1[mask], nn12[mask]], dim=-1)
 
@@ -67,11 +67,11 @@ def mutual_nn_ratio_matcher(descriptors1, descriptors2, ratio=0.8, device="cuda"
     ratios21 = nns_dist[:, 0] / (nns_dist[:, 1] + 1e-8)
     # Save first NN.
     nn21 = nns[:, 0]
-    
+
     # Mutual NN + symmetric ratio test.
     ids1 = torch.arange(0, sim.shape[0], device=device)
     mask = torch.min(ids1 == nn21[nn12], torch.min(ratios12 <= ratio, ratios21[nn12] <= ratio))
-    
+
     # Final matches.
     matches = torch.stack([ids1[mask], nn12[mask]], dim=-1)
 

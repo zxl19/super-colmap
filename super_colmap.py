@@ -5,6 +5,7 @@ import os, time
 import numpy as np
 import argparse
 from database import COLMAPDatabase
+from status import status
 
 camModelDict = {'SIMPLE_PINHOLE': 0,
                 'PINHOLE': 1,
